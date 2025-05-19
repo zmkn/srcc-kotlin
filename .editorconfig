@@ -1,0 +1,11 @@
+[*.{kt,kts}]
+# 禁用 max-line-length 规则
+ktlint_code_style = intellij_idea
+max_line_length = off
+ktlint_standard_backing-property-naming = disabled
+ktlint_standard_property-naming = disabled
+ktlint_standard_no-wildcard-imports = disabled
+ktlint_standard_argument-list-wrapping = disabled
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled
+ktlint_standard_enum-entry-name-case = disabled

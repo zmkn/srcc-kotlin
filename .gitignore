@@ -1,0 +1,19 @@
+.gradle/
+.idea/
+.kotlin/
+build/
+bin/
+config/
+temp/
+*.iml
+/local.properties
+
+# ENV
+.env
+.env.*
+
+# Cache
+.ehcache
+
+# Exception
+!*/*/**/config/
