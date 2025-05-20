@@ -3,7 +3,6 @@ kotlin = "[2.1,3.0)"
 ktlint = "[12.1,13.0)"
 shadow = "[8.3,9.0)"
 jreleaser = "[1.16,2.0)"
-kotlinxCoroutinesCore = "[1.10,2.0)"
 zmknLog = "1.0.0-SNAPSHOT"
 nacos = "[2.5,3.0)"
 
@@ -15,7 +14,6 @@ jreleaser = { id = "org.jreleaser", version.ref = "jreleaser" }
 
 [libraries]
 kotlin-test-junit5 = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit5", version.ref = "kotlin" }
-kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 
 zmkn-log-logger-kotlin = { group = "com.zmkn.log", name = "logger-kotlin", version.ref = "zmknLog" }
 nacos-client = { group = "com.alibaba.nacos", name = "nacos-client", version.ref = "nacos" }
