@@ -12,42 +12,12 @@ import java.util.concurrent.TimeUnit
 object NacosNameResolverUtils {
     private val _logger = Logger.getInstance()
 
-    // 定时刷新缓存
-    private lateinit var _autoRefreshTaskExecutor: ScheduledThreadPoolExecutor
+    // 定时刷新任务缓存
+    private var _autoRefreshTaskExecutor: ScheduledThreadPoolExecutor? = null
 
-    private const val AUTO_REFRESH_TASK_PERIOD: Long = 5
+    private const val AUTO_REFRESH_TASK_PERIOD: Long = 300
 
     val resolverInstances: ConcurrentHashMap<String, NacosNameResolver> = ConcurrentHashMap()
-
-    init {
-        startupAutoRefreshTask()
-        // 注册 JVM 关闭钩子
-        Runtime.getRuntime().addShutdownHook(Thread {
-            shutdown()
-        })
-    }
-
-    private fun startupAutoRefreshTask(period: Long = AUTO_REFRESH_TASK_PERIOD) {
-        _autoRefreshTaskExecutor = ScheduledThreadPoolExecutor(1).apply {
-            scheduleAtFixedRate({
-                resolverInstances.values.forEach {
-                    it.refresh()
-                }
-            }, period, period, TimeUnit.MINUTES)
-        }
-    }
-
-    fun shutdownAutoRefreshTask(): Boolean {
-        return if (_autoRefreshTaskExecutor.isShutdown) {
-            _logger.info("AutoRefreshTaskExecutor has already been shut down. No need to shut it down again.")
-            false
-        } else {
-            _logger.info("AutoRefreshTaskExecutor is beginning to shut down.")
-            _autoRefreshTaskExecutor.shutdownNow()
-            _logger.info("AutoRefreshTaskExecutor has been shut down.")
-            true
-        }
-    }
 
     fun getResolver(serviceName: String): NacosNameResolver? = resolverInstances[serviceName]
 
@@ -95,11 +65,48 @@ object NacosNameResolverUtils {
 
     fun shutdownResolver(serviceName: String): Boolean = getResolver(serviceName)?.shutdown() ?: false
 
-    fun shutdown() {
-        // 立即终止定时任务
-        shutdownAutoRefreshTask()
-        resolverInstances.values.forEach {
-            it.shutdown()
+    fun shutdownAllResolver(): List<Boolean> = resolverInstances.values.map {
+        it.shutdown()
+    }
+
+    fun startupAutoRefreshTask(period: Long = AUTO_REFRESH_TASK_PERIOD): Boolean {
+        return if (_autoRefreshTaskExecutor == null || _autoRefreshTaskExecutor!!.isShutdown) {
+            _logger.info("AutoRefreshTask is beginning to startup.")
+            _autoRefreshTaskExecutor = ScheduledThreadPoolExecutor(1).apply {
+                scheduleAtFixedRate({
+                    resolverInstances.values.forEach {
+                        it.refresh()
+                    }
+                }, period, period, TimeUnit.SECONDS)
+            }
+            _logger.info("AutoRefreshTask has been startup.")
+            true
+        } else {
+            _logger.info("AutoRefreshTask has already been startup. No need to startup it again.")
+            false
         }
+    }
+
+    fun shutdownAutoRefreshTask(): Boolean {
+        return if (_autoRefreshTaskExecutor == null) {
+            _logger.info("AutoRefreshTask has never been started.")
+            false
+        } else {
+            if (_autoRefreshTaskExecutor!!.isShutdown) {
+                _logger.info("AutoRefreshTask has already been shut down. No need to shut it down again.")
+                false
+            } else {
+                _logger.info("AutoRefreshTask is beginning to shut down.")
+                _autoRefreshTaskExecutor!!.shutdownNow()
+                _logger.info("AutoRefreshTask has been shut down.")
+                true
+            }
+        }
+    }
+
+    fun shutdown() {
+        // 立即终止定时刷新任务
+        shutdownAutoRefreshTask()
+        shutdownAllResolver()
     }
 }
