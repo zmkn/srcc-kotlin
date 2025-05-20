@@ -143,19 +143,6 @@ class NacosNameResolver(
         }
     }
 
-    fun shutdown(): Boolean {
-        return if (namingService.isHealthy) {
-            stop()
-            _logger.info(serviceName, "NacosNameResolver is beginning to shut down.")
-            namingService.shutDown()
-            _logger.info(serviceName, "NacosNameResolver has been shut down.")
-            true
-        } else {
-            _logger.info(serviceName, "NacosNameResolver has already been shut down. No need to shut it down again.")
-            false
-        }
-    }
-
     companion object {
         private const val COUNTER_RESET_MULTIPLE = 1000
 
