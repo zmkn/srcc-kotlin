@@ -6,6 +6,7 @@ import com.alibaba.nacos.api.naming.listener.NamingEvent
 import com.alibaba.nacos.api.naming.pojo.Instance
 import com.zmkn.log.logger.Logger
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
 class NacosNameResolver(
@@ -19,6 +20,7 @@ class NacosNameResolver(
     }
 
     private val _logger = Logger.getInstance()
+    private val _counter: AtomicInteger = AtomicInteger(0)
 
     private var _shutdown = true
 
@@ -32,17 +34,19 @@ class NacosNameResolver(
 
     private fun reset(instances: List<Instance>) {
         serviceInstances[serviceName] = instances
+        // 重置计数器
+        _counter.set(0)
     }
 
-    fun getServiceInstance(
+    fun getWeightedInstance(
         isEphemeral: Boolean = false,
         metadata: Map<String, String> = mapOf(),
-    ): Instance {
+    ): Instance? {
         val instances = serviceInstances[serviceName]?.filter {
             it.isEnabled && it.isHealthy && it.isEphemeral == isEphemeral && it.metadata == metadata
         }
         return if (instances.isNullOrEmpty()) {
-            throw IllegalStateException("Service $serviceName not found")
+            null
         } else {
             // 基于权重的负载均衡
             val totalWeight = instances.sumOf { it.weight }
@@ -54,6 +58,28 @@ class NacosNameResolver(
                 }
             }
             instances.last()
+        }
+    }
+
+    fun getRoundRobinInstance(
+        isEphemeral: Boolean = false,
+        metadata: Map<String, String> = mapOf(),
+    ): Instance? {
+        val instances = serviceInstances[serviceName]?.filter {
+            it.isEnabled && it.isHealthy && it.isEphemeral == isEphemeral && it.metadata == metadata
+        }
+        return if (instances.isNullOrEmpty()) {
+            null
+        } else {
+            // 基于轮询的负载均衡
+            val current = _counter.getAndUpdate { prev ->
+                when {
+                    // 每 1000 倍实例数重置一次
+                    prev >= instances.size * COUNTER_RESET_MULTIPLE -> 0
+                    else -> prev + 1
+                }
+            }
+            instances[current % instances.size]
         }
     }
 
@@ -106,6 +132,8 @@ class NacosNameResolver(
     }
 
     companion object {
+        private const val COUNTER_RESET_MULTIPLE = 1000
+
         const val DEFAULT_GROUP_NAME = "DEFAULT_GROUP"
 
         // 缓存服务实例列表 Key: serviceName
