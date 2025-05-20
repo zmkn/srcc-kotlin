@@ -63,6 +63,10 @@ object NacosNameResolverUtils {
 
     fun stopResolver(serviceName: String): Boolean = getResolver(serviceName)?.stop() ?: false
 
+    fun stopAllResolver(): List<Boolean> = resolverInstances.values.map {
+        it.stop()
+    }
+
     fun startupAutoRefreshTask(period: Long = AUTO_REFRESH_TASK_PERIOD): Boolean {
         return if (_autoRefreshTaskExecutor == null || _autoRefreshTaskExecutor!!.isShutdown) {
             _logger.info("AutoRefreshTask is beginning to startup.")
