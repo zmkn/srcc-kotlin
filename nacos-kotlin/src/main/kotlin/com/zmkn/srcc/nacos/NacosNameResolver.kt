@@ -36,11 +36,15 @@ class NacosNameResolver(
     }
 
     fun getWeightedInstance(
-        isEphemeral: Boolean = false,
+        isEphemeral: Boolean? = null,
         metadata: Map<String, String> = mapOf(),
     ): Instance? {
         val instances = serviceInstances[serviceName]?.filter {
-            it.isEnabled && it.isHealthy && it.isEphemeral == isEphemeral && it.metadata == metadata
+            if (isEphemeral == null) {
+                it.isEnabled && it.isHealthy && it.metadata == metadata
+            } else {
+                it.isEnabled && it.isHealthy && it.isEphemeral == isEphemeral && it.metadata == metadata
+            }
         }
         return if (instances.isNullOrEmpty()) {
             null
@@ -59,11 +63,15 @@ class NacosNameResolver(
     }
 
     fun getRoundRobinInstance(
-        isEphemeral: Boolean = false,
+        isEphemeral: Boolean? = null,
         metadata: Map<String, String> = mapOf(),
     ): Instance? {
         val instances = serviceInstances[serviceName]?.filter {
-            it.isEnabled && it.isHealthy && it.isEphemeral == isEphemeral && it.metadata == metadata
+            if (isEphemeral == null) {
+                it.isEnabled && it.isHealthy && it.metadata == metadata
+            } else {
+                it.isEnabled && it.isHealthy && it.isEphemeral == isEphemeral && it.metadata == metadata
+            }
         }
         return if (instances.isNullOrEmpty()) {
             null
