@@ -23,20 +23,20 @@ object NacosNameResolverUtils {
 
     fun getWeightedInstance(
         serviceName: String,
-        isEphemeral: Boolean? = null,
         metadata: Map<String, String> = mapOf(),
+        isEphemeral: Boolean? = null,
     ): Instance? = getResolver(serviceName)?.getWeightedInstance(
-        isEphemeral = isEphemeral,
         metadata = metadata,
+        isEphemeral = isEphemeral,
     )
 
     fun getRoundRobinInstance(
         serviceName: String,
-        isEphemeral: Boolean? = null,
         metadata: Map<String, String> = mapOf(),
+        isEphemeral: Boolean? = null,
     ): Instance? = getResolver(serviceName)?.getRoundRobinInstance(
-        isEphemeral = isEphemeral,
         metadata = metadata,
+        isEphemeral = isEphemeral,
     )
 
     fun initResolver(
