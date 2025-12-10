@@ -81,6 +81,7 @@ class NacosNameResolver(
                 when {
                     // 每 1000 倍实例数重置一次
                     prev >= instances.size * COUNTER_RESET_MULTIPLE -> 0
+
                     else -> prev + 1
                 }
             }
@@ -88,67 +89,61 @@ class NacosNameResolver(
         }
     }
 
-    fun start(): Boolean {
-        return if (namingService.isHealthy) {
-            if (_stopped) {
-                synchronized(this) {
-                    _logger.info(serviceName, "NacosNameResolver is starting up.")
-                    // 初始获取服务列表
-                    reset(namingService.selectInstances(serviceName, groupName, clusters, true))
-                    // 订阅服务变更
-                    namingService.subscribe(serviceName, groupName, clusters, _subscribeListener)
-                    _stopped = false
-                    _logger.info(serviceName, "NacosNameResolver has been successfully subscribed.", "NacosNameResolver has finished starting up.")
-                    true
-                }
-            } else {
-                _logger.info(serviceName, "NacosNameResolver is already running. No need to start it again.")
-                false
+    fun start(): Boolean = if (namingService.isHealthy) {
+        if (_stopped) {
+            synchronized(this) {
+                _logger.info(serviceName, "NacosNameResolver is starting up.")
+                // 初始获取服务列表
+                reset(namingService.selectInstances(serviceName, groupName, clusters, true))
+                // 订阅服务变更
+                namingService.subscribe(serviceName, groupName, clusters, _subscribeListener)
+                _stopped = false
+                _logger.info(serviceName, "NacosNameResolver has been successfully subscribed.", "NacosNameResolver has finished starting up.")
+                true
             }
         } else {
-            _logger.info(serviceName, "NacosNameResolver has already been shut down. No need to start it again.")
+            _logger.info(serviceName, "NacosNameResolver is already running. No need to start it again.")
             false
         }
+    } else {
+        _logger.info(serviceName, "NacosNameResolver has already been shut down. No need to start it again.")
+        false
     }
 
-    fun refresh(): Boolean {
-        return if (namingService.isHealthy) {
-            if (!_stopped) {
-                synchronized(this) {
-                    _logger.info(serviceName, "NacosNameResolver is starting to refresh.")
-                    reset(namingService.selectInstances(serviceName, groupName, clusters, true))
-                    _logger.info(serviceName, "NacosNameResolver has finished refreshing.", serviceInstances[serviceName])
-                    true
-                }
-            } else {
-                _logger.info(serviceName, "NacosNameResolver is not running. Refreshing is not possible.")
-                false
+    fun refresh(): Boolean = if (namingService.isHealthy) {
+        if (!_stopped) {
+            synchronized(this) {
+                _logger.info(serviceName, "NacosNameResolver is starting to refresh.")
+                reset(namingService.selectInstances(serviceName, groupName, clusters, true))
+                _logger.info(serviceName, "NacosNameResolver has finished refreshing.", serviceInstances[serviceName])
+                true
             }
         } else {
-            _logger.info(serviceName, "NacosNameResolver has already been shut down. Refreshing is not possible.")
+            _logger.info(serviceName, "NacosNameResolver is not running. Refreshing is not possible.")
             false
         }
+    } else {
+        _logger.info(serviceName, "NacosNameResolver has already been shut down. Refreshing is not possible.")
+        false
     }
 
-    fun stop(): Boolean {
-        return if (namingService.isHealthy) {
-            if (!_stopped) {
-                synchronized(this) {
-                    _logger.info(serviceName, "NacosNameResolver is beginning to stop.")
-                    // 取消订阅服务
-                    namingService.unsubscribe(serviceName, groupName, clusters, _subscribeListener)
-                    _stopped = true
-                    _logger.info(serviceName, "NacosNameResolver has been unsubscribed.", "NacosNameResolver has been stopped.")
-                    true
-                }
-            } else {
-                _logger.info(serviceName, "NacosNameResolver is already stopped. No need to stop it again.")
-                false
+    fun stop(): Boolean = if (namingService.isHealthy) {
+        if (!_stopped) {
+            synchronized(this) {
+                _logger.info(serviceName, "NacosNameResolver is beginning to stop.")
+                // 取消订阅服务
+                namingService.unsubscribe(serviceName, groupName, clusters, _subscribeListener)
+                _stopped = true
+                _logger.info(serviceName, "NacosNameResolver has been unsubscribed.", "NacosNameResolver has been stopped.")
+                true
             }
         } else {
-            _logger.info(serviceName, "NacosNameResolver has already been shut down. No need to stop it again.")
+            _logger.info(serviceName, "NacosNameResolver is already stopped. No need to stop it again.")
             false
         }
+    } else {
+        _logger.info(serviceName, "NacosNameResolver has already been shut down. No need to stop it again.")
+        false
     }
 
     companion object {

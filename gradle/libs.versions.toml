@@ -1,10 +1,10 @@
 [versions]
-kotlin = "[2.2,3.0)"
-ktlint = "[12.1,13.0)"
-shadow = "[8.3,9.0)"
-jreleaser = "[1.16,2.0)"
+kotlin = "[2.3,3.0)"
+ktlint = "[14.0,15.0)"
+shadow = "[9.3,10.0)"
+jreleaser = "[1.21,2.0)"
 zmknLog = "1.0.0-SNAPSHOT"
-nacos = "[3.0,4.0)"
+nacos = "[3.1,4.0)"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

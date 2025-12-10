@@ -44,16 +44,14 @@ object NacosNameResolverUtils {
         serviceName: String,
         groupName: String = DEFAULT_GROUP_NAME,
         clusters: List<String> = listOf(),
-    ): NacosNameResolver {
-        return resolverInstances[serviceName] ?: synchronized(this) {
-            NacosNameResolver(
-                namingService = namingService,
-                serviceName = serviceName,
-                groupName = groupName,
-                clusters = clusters,
-            ).also {
-                resolverInstances[serviceName] = it
-            }
+    ): NacosNameResolver = resolverInstances[serviceName] ?: synchronized(this) {
+        NacosNameResolver(
+            namingService = namingService,
+            serviceName = serviceName,
+            groupName = groupName,
+            clusters = clusters,
+        ).also {
+            resolverInstances[serviceName] = it
         }
     }
 
@@ -67,38 +65,34 @@ object NacosNameResolverUtils {
         it.stop()
     }
 
-    fun startupAutoRefreshTask(period: Long = AUTO_REFRESH_TASK_PERIOD): Boolean {
-        return if (_autoRefreshTaskExecutor == null || _autoRefreshTaskExecutor!!.isShutdown) {
-            _logger.info("AutoRefreshTask is beginning to startup.")
-            _autoRefreshTaskExecutor = ScheduledThreadPoolExecutor(1).apply {
-                scheduleAtFixedRate({
-                    resolverInstances.values.forEach {
-                        it.refresh()
-                    }
-                }, period, period, TimeUnit.SECONDS)
-            }
-            _logger.info("AutoRefreshTask has been startup.")
-            true
-        } else {
-            _logger.info("AutoRefreshTask has already been startup. No need to startup it again.")
-            false
+    fun startupAutoRefreshTask(period: Long = AUTO_REFRESH_TASK_PERIOD): Boolean = if (_autoRefreshTaskExecutor == null || _autoRefreshTaskExecutor!!.isShutdown) {
+        _logger.info("AutoRefreshTask is beginning to startup.")
+        _autoRefreshTaskExecutor = ScheduledThreadPoolExecutor(1).apply {
+            scheduleAtFixedRate({
+                resolverInstances.values.forEach {
+                    it.refresh()
+                }
+            }, period, period, TimeUnit.SECONDS)
         }
+        _logger.info("AutoRefreshTask has been startup.")
+        true
+    } else {
+        _logger.info("AutoRefreshTask has already been startup. No need to startup it again.")
+        false
     }
 
-    fun shutdownAutoRefreshTask(): Boolean {
-        return if (_autoRefreshTaskExecutor == null) {
-            _logger.info("AutoRefreshTask has never been started.")
+    fun shutdownAutoRefreshTask(): Boolean = if (_autoRefreshTaskExecutor == null) {
+        _logger.info("AutoRefreshTask has never been started.")
+        false
+    } else {
+        if (_autoRefreshTaskExecutor!!.isShutdown) {
+            _logger.info("AutoRefreshTask has already been shut down. No need to shut it down again.")
             false
         } else {
-            if (_autoRefreshTaskExecutor!!.isShutdown) {
-                _logger.info("AutoRefreshTask has already been shut down. No need to shut it down again.")
-                false
-            } else {
-                _logger.info("AutoRefreshTask is beginning to shut down.")
-                _autoRefreshTaskExecutor!!.shutdownNow()
-                _logger.info("AutoRefreshTask has been shut down.")
-                true
-            }
+            _logger.info("AutoRefreshTask is beginning to shut down.")
+            _autoRefreshTaskExecutor!!.shutdownNow()
+            _logger.info("AutoRefreshTask has been shut down.")
+            true
         }
     }
 }
