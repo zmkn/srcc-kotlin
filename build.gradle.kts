@@ -192,42 +192,49 @@ allprojects {
                 // Defaults to `NEVER`.
                 active.set(Active.ALWAYS)
 
-                // Generates an armored signature.
-                // Defaults to `false`.
-                armored.set(true)
+                pgp {
+                    // Enables or disables file signing.
+                    // Supported values are [`NEVER`, `ALWAYS`, `RELEASE`, `SNAPSHOT`].
+                    // Defaults to `NEVER`.
+                    active.set(Active.ALWAYS)
 
-                // Verify signature files.
-                // If `false` then `publicKey` may be ommitted.
-                // Defaults to `true`.
-                verify.set(true)
+                    // Generates an armored signature.
+                    // Defaults to `false`.
+                    armored.set(true)
 
-                // How should GPG keys be handled.
-                // Supported values are [`MEMORY`, `FILE`, `COMMAND`, `COSIGN`].
-                // Defaults to `MEMORY`.
-                mode.set(Signing.Mode.MEMORY)
+                    // Verify signature files.
+                    // If `false` then `publicKey` may be ommitted.
+                    // Defaults to `true`.
+                    verify.set(true)
 
-                // The passphrase required to read secret keys.
-                passphrase.set(localProperties.getProperty("signing.password"))
+                    // How should GPG keys be handled.
+                    // Supported values are [`MEMORY`, `FILE`, `COMMAND`, `COSIGN`].
+                    // Defaults to `MEMORY`.
+                    mode.set(Signing.Mode.MEMORY)
 
-                // The public GPG (ascii armored) used to sign files and commits.
-                // Required when mode = `MEMORY` || `FILE`.
-                publicKey.set(localProperties.getProperty("signing.publicKey"))
+                    // The passphrase required to read secret keys.
+                    passphrase.set(localProperties.getProperty("signing.password"))
 
-                // The private GPG (ascii armored) used to sign files and commits.
-                // Required when mode = `MEMORY` || `FILE`.
-                secretKey.set(localProperties.getProperty("signing.secretKey"))
+                    // The public GPG (ascii armored) used to sign files and commits.
+                    // Required when mode = `MEMORY` || `FILE`.
+                    publicKey.set(localProperties.getProperty("signing.publicKey"))
 
-                // Sign files.
-                // Defaults to `true`.
-                files.set(true)
+                    // The private GPG (ascii armored) used to sign files and commits.
+                    // Required when mode = `MEMORY` || `FILE`.
+                    secretKey.set(localProperties.getProperty("signing.secretKey"))
 
-                // Sign distribution artifacts.
-                // Defaults to `true`.
-                artifacts.set(true)
+                    // Sign files.
+                    // Defaults to `true`.
+                    files.set(true)
 
-                // Sign checksum files.
-                // Defaults to `true`.
-                checksums.set(true)
+                    // Sign distribution artifacts.
+                    // Defaults to `true`.
+                    artifacts.set(true)
+
+                    // Sign checksum files.
+                    // Defaults to `true`.
+                    checksums.set(true)
+                }
             }
             release {
                 // Repo in which the release will be created.
